@@ -14,8 +14,9 @@ class eachare {
         endereco = args[0];
         vizinhos = args[1];
         diretorio = args[2];
-        comandos c = new comandos();
-        
+        comandos opcoes = new comandos();
+        List<Vizinho> lista_de_vizinhos = new ArrayList<Vizinho>();
+        File folder = new File(diretorio); //abre a pasta a ser compartilhada
         //abre um socket na porta especificada no argumento
         String[] endereco_separado = endereco.split(":");
         int porta = Integer.parseInt(endereco_separado[1]);
@@ -25,25 +26,26 @@ class eachare {
         //abre o arquivo com a lista de vizinhos
         try (BufferedReader br = new BufferedReader(new FileReader(vizinhos))){
             String linha; //tenho que colocar essa informação em um vetor
-            List<Vizinho> lista_de_vizinhos = new ArrayList<Vizinho>();
+            
             //esse é o comando1, mas falta adicionar a opção de mandar mensagem para um peer
             while((linha = br.readLine()) != null){
                 lista_de_vizinhos.add(new Vizinho(linha));
-                System.out.println(linha);
+                System.out.println("Adicionando novo peer: " + linha + " status OFFILINE");
             }
             
-            c.comando1(lista_de_vizinhos);
+            opcoes.comando1(lista_de_vizinhos);
         } catch (IOException e){
             System.err.println("Erro ao ler o arquivo: " + e.getMessage());
         }
 
-        //abre a pasta a ser compartilhada
-        File folder = new File(diretorio);
+        
+        
         //colocar isso em um método separado por exemplo comando3(File folder)
         File[] arquivos = folder.listFiles();
         //tenho que guardar essa informação
         //isso é o comando 3
-        c.comando3(arquivos);
+        opcoes.comando3(arquivos);
+        new Thread(() -> menu(lista_de_vizinhos, folder, opcoes)).start();
 
         //recebe conecções
 /*/        while(true){
@@ -51,7 +53,39 @@ class eachare {
             new Thread(() -> handleConnection(clientSocket)).start();
         }*/
     }
+    private static void menu (List<Vizinho> lista, File diretorio, comandos opcoes){
+        System.out.println("Escolha um comando:");
+        System.out.println("\t [1] Listar peers");
+        System.out.println("\t [2] Obter peers");
+        System.out.println("\t [3] Listar arquivos locais");
+        System.out.println("\t [4] Buscar arquivos");
+        System.out.println("\t [5] Exibir estatísticas");
+        System.out.println("\t [6] Alterar tamanho de chunk");
+        System.out.println("\t [9] Sair");
 
+        Scanner sc = new Scanner (System.in);
+        int comando = sc.nextInt();
+        System.out.println("Opção escolhida: " + comando);
+        sc.close();
+
+        if(comando == 1){
+            opcoes.comando1(lista);
+        } else if (comando == 2) {
+            //opcoes.comando2();
+        } else if (comando == 3) {
+            opcoes.comando3(diretorio.listFiles());
+        } else if (comando == 4) {
+            //opcoes.comando4();
+        } else if (comando == 5) {
+            //opcoes.comando5();
+        } else if (comando == 6) {
+            //opcoes.comando6();
+        } else if (comando == 9) {
+            //opcoes.comando9();
+        } else {
+            System.out.println("Comando inválido");
+        }
+    }
 
 
   /*   private static void handleConnection (Socket clientSocket) {

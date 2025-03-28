@@ -8,6 +8,7 @@ class comandos {
         for(Vizinho vizinho : lista){
             vizinho.imprime();
         }
+        //falta acrescentar a opção de mandar o HELLO
     }
     public void comando3 (File[] arquivos){
         if (arquivos != null){
