@@ -54,37 +54,44 @@ class eachare {
         }*/
     }
     private static void menu (List<Vizinho> lista, File diretorio, comandos opcoes){
-        System.out.println("Escolha um comando:");
-        System.out.println("\t [1] Listar peers");
-        System.out.println("\t [2] Obter peers");
-        System.out.println("\t [3] Listar arquivos locais");
-        System.out.println("\t [4] Buscar arquivos");
-        System.out.println("\t [5] Exibir estatísticas");
-        System.out.println("\t [6] Alterar tamanho de chunk");
-        System.out.println("\t [9] Sair");
-
+        boolean continuar = true;
         Scanner sc = new Scanner (System.in);
-        int comando = sc.nextInt();
-        System.out.println("Opção escolhida: " + comando);
-        sc.close();
+        while(continuar){
+        
+            System.out.println("Escolha um comando:");
+            System.out.println("\t [1] Listar peers");
+            System.out.println("\t [2] Obter peers");
+            System.out.println("\t [3] Listar arquivos locais");
+            System.out.println("\t [4] Buscar arquivos");
+            System.out.println("\t [5] Exibir estatísticas");
+            System.out.println("\t [6] Alterar tamanho de chunk");
+            System.out.println("\t [9] Sair");
 
-        if(comando == 1){
-            opcoes.comando1(lista);
-        } else if (comando == 2) {
-            //opcoes.comando2();
-        } else if (comando == 3) {
-            opcoes.comando3(diretorio.listFiles());
-        } else if (comando == 4) {
-            //opcoes.comando4();
-        } else if (comando == 5) {
-            //opcoes.comando5();
-        } else if (comando == 6) {
-            //opcoes.comando6();
-        } else if (comando == 9) {
-            //opcoes.comando9();
-        } else {
-            System.out.println("Comando inválido");
-        }
+            
+            int comando = sc.nextInt();
+            System.out.println("Opção escolhida: " + comando);
+            
+        
+            if(comando == 1){
+                opcoes.comando1(lista);
+            } else if (comando == 2) {
+                //opcoes.comando2();
+            } else if (comando == 3) {
+                opcoes.comando3(diretorio.listFiles());
+            } else if (comando == 4) {
+                //opcoes.comando4();
+            } else if (comando == 5) {
+                //opcoes.comando5();
+            } else if (comando == 6) {
+                //opcoes.comando6();
+            } else if (comando == 9) {
+                continuar = false;
+                //opcoes.comando9();
+            } else {
+                System.out.println("Comando inválido");
+            }
+       }
+       sc.close();
     }
 
 
