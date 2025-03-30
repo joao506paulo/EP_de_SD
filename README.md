@@ -1,2 +1,3 @@
 # EP_de_SD
-Por enquanto, estou implementando o que consigo sem mandar mensagens TCP (parte do comando 1 e comando 3, além do menu).
+Implementação da tela inicial e do menu de opções.
+Falta mandar e rebeber mensagens entre os peers.
