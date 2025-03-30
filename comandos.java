@@ -5,10 +5,18 @@ import java.util.*;
 
 class comandos {
     public void comando1 (List<Vizinho> lista){
+        int i = 1;
+        Scanner sc = new Scanner(System.in);
+        System.out.println("[0] voltar para o menu anterior");
         for(Vizinho vizinho : lista){
+            System.out.print("[" + i +"]");
             vizinho.imprime();
+            System.out.print("\n");
+            i++;
         }
-        
+        int comando = sc.nextInt();
+        System.out.println("Opção escolhida: " + comando);
+        //colocar ifs e mandar mensagem com a classe mensagens
         //falta acrescentar a opção de mandar o HELLO
     }
     public void comando2 (){

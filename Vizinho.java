@@ -16,6 +16,6 @@ class Vizinho {
         this.estado = estado;
     }
     public void imprime (){
-        System.out.println(endereco + " " + estado);
+        System.out.print(endereco + " " + estado);
     }
 }
