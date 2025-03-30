@@ -15,6 +15,7 @@ class eachare {
         vizinhos = args[1];
         diretorio = args[2];
         comandos opcoes = new comandos();
+        mensagens mensagem = new mensagens();
         List<Vizinho> lista_de_vizinhos = new ArrayList<Vizinho>();
         File folder = new File(diretorio); //abre a pasta a ser compartilhada
         //abre um socket na porta especificada no argumento
@@ -33,7 +34,7 @@ class eachare {
                 System.out.println("Adicionando novo peer: " + linha + " status OFFILINE");
             }
             
-            opcoes.comando1(lista_de_vizinhos);
+            //opcoes.comando1(lista_de_vizinhos);
         } catch (IOException e){
             System.err.println("Erro ao ler o arquivo: " + e.getMessage());
         }
@@ -46,16 +47,22 @@ class eachare {
         //isso é o comando 3
         //opcoes.comando3(arquivos);
         List<Socket> lista_de_clientes = new ArrayList<Socket>();
-        new Thread(() -> menu(lista_de_vizinhos, folder, opcoes, serverSocket, lista_de_clientes)).start();
+        new Thread(() -> menu(lista_de_vizinhos, folder, opcoes, serverSocket, lista_de_clientes, mensagem)).start();
 
         //recebe conecções
-       /*  while(true){
-            Socket clientSocket = ServerSocket.accept();
-            lista_de_clientes.add(clientSocket);
-            new Thread(() -> handleConnection(clientSocket)).start();
-        }*/
+        while(true){
+            try{
+                Socket clientSocket = serverSocket.accept();
+                lista_de_clientes.add(clientSocket);
+                new Thread(() -> handleConnection(clientSocket)).start();
+            } catch (SocketException e){
+                System.out.println("Servidor encerrado");
+                break;
+            }
+        }
+        
     }
-    private static void menu (List<Vizinho> lista_vizinhos, File diretorio, comandos opcoes, ServerSocket serverSocket, List<Socket> lista_clientes){
+    private static void menu (List<Vizinho> lista_vizinhos, File diretorio, comandos opcoes, ServerSocket serverSocket, List<Socket> lista_clientes, mensagens mensagem){
         boolean continuar = true;
         Scanner sc = new Scanner (System.in);
         while(continuar){
@@ -99,13 +106,14 @@ class eachare {
             }
        }
        sc.close();
+       
     }
 
 
-  /*   private static void handleConnection (Socket clientSocket) {
+    private static void handleConnection (Socket clientSocket) {
         try(
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferredReader in = new BufferredReader (new InputStreamReder(clientSocket.getInputStream()));
+            BufferedReader in = new BufferedReader (new InputStreamReader(clientSocket.getInputStream()));
         ){
             String inputLine;
             while ((inputLine = in.readLine()) != null){
@@ -116,5 +124,5 @@ class eachare {
                 e.printStackTrace();
 
         } 
-    } */
+    } 
 }

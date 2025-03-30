@@ -43,7 +43,7 @@ class comandos {
             //mandar a mensagem tipo bye
             cliente.close();
         }
+
         serverSocket.close();
-        System.out.println("Comando ainda não implementado."); 
     }
 }
