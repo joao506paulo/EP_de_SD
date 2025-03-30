@@ -20,9 +20,9 @@ class eachare {
         //abre um socket na porta especificada no argumento
         String[] endereco_separado = endereco.split(":");
         int porta = Integer.parseInt(endereco_separado[1]);
-        //ServerSocket ServerSocket = new ServerSocket(porta);
+        ServerSocket serverSocket = new ServerSocket(porta);
         System.out.println(porta);
-
+        
         //abre o arquivo com a lista de vizinhos
         try (BufferedReader br = new BufferedReader(new FileReader(vizinhos))){
             String linha; //tenho que colocar essa informação em um vetor
@@ -44,16 +44,18 @@ class eachare {
         File[] arquivos = folder.listFiles();
         //tenho que guardar essa informação
         //isso é o comando 3
-        opcoes.comando3(arquivos);
-        new Thread(() -> menu(lista_de_vizinhos, folder, opcoes)).start();
+        //opcoes.comando3(arquivos);
+        List<Socket> lista_de_clientes = new ArrayList<Socket>();
+        new Thread(() -> menu(lista_de_vizinhos, folder, opcoes, serverSocket, lista_de_clientes)).start();
 
         //recebe conecções
-/*/        while(true){
+       /*  while(true){
             Socket clientSocket = ServerSocket.accept();
+            lista_de_clientes.add(clientSocket);
             new Thread(() -> handleConnection(clientSocket)).start();
         }*/
     }
-    private static void menu (List<Vizinho> lista, File diretorio, comandos opcoes){
+    private static void menu (List<Vizinho> lista_vizinhos, File diretorio, comandos opcoes, ServerSocket serverSocket, List<Socket> lista_clientes){
         boolean continuar = true;
         Scanner sc = new Scanner (System.in);
         while(continuar){
@@ -73,20 +75,25 @@ class eachare {
             
         
             if(comando == 1){
-                opcoes.comando1(lista);
+                opcoes.comando1(lista_vizinhos);
             } else if (comando == 2) {
-                //opcoes.comando2();
+                opcoes.comando2();
             } else if (comando == 3) {
                 opcoes.comando3(diretorio.listFiles());
             } else if (comando == 4) {
-                //opcoes.comando4();
+                opcoes.comando4();
             } else if (comando == 5) {
-                //opcoes.comando5();
+                opcoes.comando5();
             } else if (comando == 6) {
-                //opcoes.comando6();
+                opcoes.comando6();
             } else if (comando == 9) {
                 continuar = false;
-                //opcoes.comando9();
+                try{
+                    opcoes.comando9(serverSocket, lista_clientes);    
+                } catch (IOException e) {
+                    System.err.println("Problema ao fechar servidor. " + e.getMessage());
+                }
+                
             } else {
                 System.out.println("Comando inválido");
             }
