@@ -28,9 +28,10 @@ class comandos {
         }
         //falta acrescentar a opção de mandar o HELLO
     }
-    public void comando2 (){
-        //falta implementar
-        System.out.println("Comando ainda não implementado.");   
+    public void comando2 (List<Vizinho> lista, mensagens m, String endereco, relogio r){
+        for(Vizinho v : lista){
+            m.mandaMensagem(v, endereco, r, "GET_PEERS");
+        }  
     }
     public void comando3 (File[] arquivos){
         if (arquivos != null){

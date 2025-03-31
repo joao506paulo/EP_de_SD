@@ -55,7 +55,7 @@ class eachare {
             try{
                 Socket clientSocket = serverSocket.accept();
                 lista_de_clientes.add(clientSocket);
-                new Thread(() -> handleConnection(clientSocket, r, lista_de_vizinhos)).start();
+                new Thread(() -> handleConnection(clientSocket, r, lista_de_vizinhos, mensagem, endereco)).start();
             } catch (SocketException e){
                 System.out.println("Servidor encerrado");
                 break;
@@ -85,7 +85,7 @@ class eachare {
             if(comando == 1){
                 opcoes.comando1(lista_vizinhos, mensagem, endereco, r);
             } else if (comando == 2) {
-                opcoes.comando2();
+                opcoes.comando2(lista_vizinhos, mensagem, endereco, r);
             } else if (comando == 3) {
                 opcoes.comando3(diretorio.listFiles());
             } else if (comando == 4) {
@@ -111,7 +111,7 @@ class eachare {
     }
 
 
-    private static void handleConnection (Socket clientSocket, relogio r, List<Vizinho> lista) {
+    private static void handleConnection (Socket clientSocket, relogio r, List<Vizinho> lista, mensagens m, String endereco) {
         try(
             //PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader (new InputStreamReader(clientSocket.getInputStream()));
@@ -144,6 +144,32 @@ class eachare {
                         lista.add(v);
 
                     }
+                }
+                if(partes[2].equals("GET_PEERS")){
+                    boolean achou = false;
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            v.setEstado("ONLINE");
+                            achou = true;
+                        }
+                    }
+                    if(!achou){
+                        Vizinho v = new Vizinho(partes[0]);
+                        v.setEstado("ONLINE");
+                        lista.add(v);
+                    }
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            String lista_de_vizinhos = " ";
+                            for(Vizinho vi : lista){
+                                if(!vi.getEndereco().equals(v.getEndereco())){
+                                    lista_de_vizinhos = lista_de_vizinhos + " " +vi.getEndereco()+":"+vi.getEstado()+":0";
+                                }
+                            }
+                            m.mandaMensagem(v, endereco, r, "PEER_LIST " + (lista.size()-1) + lista_de_vizinhos);
+                        }
+                    }
+
                 } 
         }
      } catch (IOException e){

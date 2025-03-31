@@ -16,9 +16,10 @@ class mensagens{
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
             r.incrementaRelogio();
-        String mensagem = endereco + " " + r.getRelogio() + " " + tipo;
+            String mensagem = endereco + " " + r.getRelogio() + " " + tipo;
             out.println(mensagem);
             System.out.println("Encaminhando mensagem " + mensagem + " para " + vizinho.getEndereco());
+            vizinho.setEstado("ONLINE");
             //String message = in.readLine();
             //System.out.println("Recebendo mensagem: " + message);
             //in.close();
