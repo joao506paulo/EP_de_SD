@@ -16,6 +16,7 @@ class eachare {
         diretorio = args[2];
         comandos opcoes = new comandos();
         mensagens mensagem = new mensagens();
+        relogio r = new relogio();
         List<Vizinho> lista_de_vizinhos = new ArrayList<Vizinho>();
         File folder = new File(diretorio); //abre a pasta a ser compartilhada
         //abre um socket na porta especificada no argumento
@@ -47,14 +48,14 @@ class eachare {
         //isso é o comando 3
         //opcoes.comando3(arquivos);
         List<Socket> lista_de_clientes = new ArrayList<Socket>();
-        new Thread(() -> menu(lista_de_vizinhos, folder, opcoes, serverSocket, lista_de_clientes, mensagem)).start();
+        new Thread(() -> menu(lista_de_vizinhos, folder, opcoes, serverSocket, lista_de_clientes, mensagem, endereco, r)).start();
 
         //recebe conecções
         while(true){
             try{
                 Socket clientSocket = serverSocket.accept();
                 lista_de_clientes.add(clientSocket);
-                new Thread(() -> handleConnection(clientSocket)).start();
+                new Thread(() -> handleConnection(clientSocket, r, lista_de_vizinhos)).start();
             } catch (SocketException e){
                 System.out.println("Servidor encerrado");
                 break;
@@ -62,7 +63,7 @@ class eachare {
         }
         
     }
-    private static void menu (List<Vizinho> lista_vizinhos, File diretorio, comandos opcoes, ServerSocket serverSocket, List<Socket> lista_clientes, mensagens mensagem){
+    private static void menu (List<Vizinho> lista_vizinhos, File diretorio, comandos opcoes, ServerSocket serverSocket, List<Socket> lista_clientes, mensagens mensagem, String endereco, relogio r){
         boolean continuar = true;
         Scanner sc = new Scanner (System.in);
         while(continuar){
@@ -82,7 +83,7 @@ class eachare {
             
         
             if(comando == 1){
-                opcoes.comando1(lista_vizinhos);
+                opcoes.comando1(lista_vizinhos, mensagem, endereco, r);
             } else if (comando == 2) {
                 opcoes.comando2();
             } else if (comando == 3) {
@@ -96,7 +97,7 @@ class eachare {
             } else if (comando == 9) {
                 continuar = false;
                 try{
-                    opcoes.comando9(serverSocket, lista_clientes);    
+                    opcoes.comando9(serverSocket, lista_clientes,lista_vizinhos, mensagem, endereco, r);    
                 } catch (IOException e) {
                     System.err.println("Problema ao fechar servidor. " + e.getMessage());
                 }
@@ -110,15 +111,40 @@ class eachare {
     }
 
 
-    private static void handleConnection (Socket clientSocket) {
+    private static void handleConnection (Socket clientSocket, relogio r, List<Vizinho> lista) {
         try(
-            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+            //PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader (new InputStreamReader(clientSocket.getInputStream()));
         ){
             String inputLine;
             while ((inputLine = in.readLine()) != null){
                 System.out.println("Mensagem recebida:" + inputLine);
-            
+                r.incrementaRelogio();
+                String[] partes = inputLine.split(" ");
+                if(partes[2].equals("HELLO")){
+                    System.out.println("Atualizando peer " + partes[0] + " status ONLINE");
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            v.setEstado("ONLINE");
+                        }
+                    }
+                }
+                if(partes[2].equals("BYE")){
+                    System.out.println("Atualizando peer " + partes[0] + " status OFFLINE");
+                    boolean achou = false;
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            v.setEstado("OFFLINE");
+                            achou = true;
+                        }
+                    }
+                    if(!achou){
+                        Vizinho v = new Vizinho(partes[0]);
+                        v.setEstado("ONLINE");
+                        lista.add(v);
+
+                    }
+                } 
         }
      } catch (IOException e){
                 e.printStackTrace();
