@@ -2,30 +2,36 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+//Essa classe é responsável por mandar mensagens de qualquer tipo
 class mensagens{
     public void mandaMensagem(Vizinho vizinho, String endereco, relogio r, String tipo){
         try{
             String[] partes = vizinho.getEndereco().split(":");
+            String campo1 = partes[0];
             int porta = Integer.parseInt(partes[1]);
-            //para a aplicação funcionar em mais de um computador, 
-            //é nescessário mudar localhost para o partes[0], com ip válido.
-            Socket socket = new Socket("localhost", porta);
+            Socket socket = new Socket(campo1, porta);
             System.out.println("conectado a " + vizinho);
             
-            //BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
             r.incrementaRelogio();
+            //monta a mensagem no formato adequado
             String mensagem = endereco + " " + r.getRelogio() + " " + tipo;
+            
+            //manda a mensagem
             out.println(mensagem);
+            
+            //mostra para o usuário que a mensagem foi enviada
             System.out.println("Encaminhando mensagem " + mensagem + " para " + vizinho.getEndereco());
+            
+            //se a mensagem foi recebida, o peer está online
             vizinho.setEstado("ONLINE");
-            //String message = in.readLine();
-            //System.out.println("Recebendo mensagem: " + message);
-            //in.close();
+
+            //fecha os recursos abertos
             out.close();
             socket.close();
         } catch (IOException e){
+            //se a mensagem não foi recebida, o peer está offline
             vizinho.setEstado("OFFLINE");
         }
     }

@@ -1,10 +1,14 @@
+//João Paulo Santos Torres
+//Rodrigo Dorneles
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
+//Essa é a classe principal do programa
 class eachare {
 
-    
+    //Esse método recebe os argumentos e cria as threads do programa
     public static void main (String [] args) throws IOException {
         //recebe os argumentos
         String endereco;
@@ -14,43 +18,41 @@ class eachare {
         endereco = args[0];
         vizinhos = args[1];
         diretorio = args[2];
+
+        //cria objetos das outras classes que serão usados no programa
         comandos opcoes = new comandos();
         mensagens mensagem = new mensagens();
         relogio r = new relogio();
-        List<Vizinho> lista_de_vizinhos = new ArrayList<Vizinho>();
-        File folder = new File(diretorio); //abre a pasta a ser compartilhada
+
         //abre um socket na porta especificada no argumento
         String[] endereco_separado = endereco.split(":");
         int porta = Integer.parseInt(endereco_separado[1]);
         ServerSocket serverSocket = new ServerSocket(porta);
-        System.out.println(porta);
         
+        //guarda o endereço dos vizinhos presentes do arquivo passado no argumento
+        List<Vizinho> lista_de_vizinhos = new ArrayList<Vizinho>();
         //abre o arquivo com a lista de vizinhos
         try (BufferedReader br = new BufferedReader(new FileReader(vizinhos))){
-            String linha; //tenho que colocar essa informação em um vetor
+            String linha;
             
-            //esse é o comando1, mas falta adicionar a opção de mandar mensagem para um peer
             while((linha = br.readLine()) != null){
                 lista_de_vizinhos.add(new Vizinho(linha));
                 System.out.println("Adicionando novo peer: " + linha + " status OFFILINE");
             }
-            
-            //opcoes.comando1(lista_de_vizinhos);
         } catch (IOException e){
             System.err.println("Erro ao ler o arquivo: " + e.getMessage());
         }
-
         
-        
-        //colocar isso em um método separado por exemplo comando3(File folder)
+        //abre a pasta a ser compartilhada
+        File folder = new File(diretorio); 
         File[] arquivos = folder.listFiles();
-        //tenho que guardar essa informação
-        //isso é o comando 3
-        //opcoes.comando3(arquivos);
+       
         List<Socket> lista_de_clientes = new ArrayList<Socket>();
+       
+        //cria a thread responsável pelo menu
         new Thread(() -> menu(lista_de_vizinhos, folder, opcoes, serverSocket, lista_de_clientes, mensagem, endereco, r)).start();
 
-        //recebe conecções
+        //recebe conexões e cria threads para lidar com as mensagens recebidas 
         while(true){
             try{
                 Socket clientSocket = serverSocket.accept();
@@ -63,11 +65,14 @@ class eachare {
         }
         
     }
+
+    //Esse método mostra as opções de comandos na tela e chama a classe comandos para executar as ações necessárias
     private static void menu (List<Vizinho> lista_vizinhos, File diretorio, comandos opcoes, ServerSocket serverSocket, List<Socket> lista_clientes, mensagens mensagem, String endereco, relogio r){
-        boolean continuar = true;
-        Scanner sc = new Scanner (System.in);
+        boolean continuar = true; //essa variável é usada para encerrar o programa
+        Scanner sc = new Scanner (System.in); //scanner para receber as entradas
         while(continuar){
-        
+            
+            //exibe na tela as opções
             System.out.println("Escolha um comando:");
             System.out.println("\t [1] Listar peers");
             System.out.println("\t [2] Obter peers");
@@ -76,12 +81,12 @@ class eachare {
             System.out.println("\t [5] Exibir estatísticas");
             System.out.println("\t [6] Alterar tamanho de chunk");
             System.out.println("\t [9] Sair");
-
+            System.out.print(">");
             
+            //lê a entrada do usuário
             int comando = sc.nextInt();
-            System.out.println("Opção escolhida: " + comando);
-            
         
+            //chama o método certo presente na classe comandos para atender o comando do usuário
             if(comando == 1){
                 opcoes.comando1(lista_vizinhos, mensagem, endereco, r);
             } else if (comando == 2) {
@@ -106,14 +111,14 @@ class eachare {
                 System.out.println("Comando inválido");
             }
        }
+       //fecha o scanner para não desperdiçar recursos
        sc.close();
        
     }
 
-
+    //Esse método recebe as mensagens quando uma conexão é feita e executa as ações necessárias para cada mensagem
     private static void handleConnection (Socket clientSocket, relogio r, List<Vizinho> lista, mensagens m, String endereco) {
         try(
-            //PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader (new InputStreamReader(clientSocket.getInputStream()));
         ){
             String inputLine;
@@ -123,15 +128,25 @@ class eachare {
                 String[] partes = inputLine.split(" ");
                 if(partes[2].equals("HELLO")){
                     System.out.println("Atualizando peer " + partes[0] + " status ONLINE");
+                    boolean achou = false;
+                    //verifica se quem mandou a mensagem é um vizinho conhecido, se não for o adiciona na lista 
                     for(Vizinho v : lista){
                         if(v.getEndereco().equals(partes[0])){
                             v.setEstado("ONLINE");
+                            achou = true;
                         }
+                    }
+                    if(!achou){
+                        Vizinho v = new Vizinho(partes[0]);
+                        v.setEstado("ONLINE");
+                        lista.add(v);
+
                     }
                 }
                 if(partes[2].equals("BYE")){
                     System.out.println("Atualizando peer " + partes[0] + " status OFFLINE");
                     boolean achou = false;
+                    //verifica se quem mandou a mensagem é um vizinho conhecido, se não for o adiciona na lista
                     for(Vizinho v : lista){
                         if(v.getEndereco().equals(partes[0])){
                             v.setEstado("OFFLINE");
@@ -140,7 +155,7 @@ class eachare {
                     }
                     if(!achou){
                         Vizinho v = new Vizinho(partes[0]);
-                        v.setEstado("ONLINE");
+                        v.setEstado("OFFLINE");
                         lista.add(v);
 
                     }
@@ -158,6 +173,7 @@ class eachare {
                         v.setEstado("ONLINE");
                         lista.add(v);
                     }
+                    //esses 'for' são para não mandar o endereço de quem mandou o GET_PEERS na resposta 
                     for(Vizinho v : lista){
                         if(v.getEndereco().equals(partes[0])){
                             String lista_de_vizinhos = " ";
@@ -170,6 +186,32 @@ class eachare {
                         }
                     }
 
+                }
+                if(partes[2].equals("PEER_LIST")){
+                    int tamanho_list = Integer.parseInt(partes[3]);
+                    int tamanho_vizinhos = lista.size();
+                    //antes de adicionar o peer na lista verifica se ele já não era conhecido
+                    for(int i = 4; i <= tamanho_list; i++){
+                        boolean achou = false;
+                        for(int j = 0; j < tamanho_vizinhos; j++){
+                            String[] peers = partes[i].split(":");
+                            String campo1 = peers[0] + ":" + peers[1];
+                            if(campo1.equals(lista.get(j).getEndereco())){
+                                String[] estado = partes[i].split(":"); 
+                                lista.get(j).setEstado(estado[2]);
+                                achou = true;
+                                break;
+                            }
+                        }
+                        if(!achou){
+                            String[] peers = partes[i].split(":");
+                            String campo1 = peers[0] + ":" + peers[1];
+                            String estado = peers[2];
+                            Vizinho peer = new Vizinho(campo1);
+                            peer.setEstado(estado);
+                            lista.add(peer);
+                        }
+                    }
                 } 
         }
      } catch (IOException e){

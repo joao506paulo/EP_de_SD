@@ -1,4 +1,4 @@
-
+//Essa classe é usada para agrupar as informações de endereço e status dos vizinhos
 class Vizinho {
     String endereco;
     String estado;
@@ -15,6 +15,7 @@ class Vizinho {
     public void setEstado (String estado){
         this.estado = estado;
     }
+    //facilita a impressão das informações do peer
     public void imprime (){
         System.out.print(endereco + " " + estado);
     }
