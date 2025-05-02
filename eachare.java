@@ -124,8 +124,10 @@ class eachare {
             String inputLine;
             while ((inputLine = in.readLine()) != null){
                 System.out.println("Mensagem recebida:" + inputLine);
-                r.incrementaRelogio();
                 String[] partes = inputLine.split(" ");
+                int relogio_mensagem = Integer.parseInt(partes[1]);
+                r.setRelogio(relogio_mensagem);
+                r.incrementaRelogio();
                 if(partes[2].equals("HELLO")){
                     System.out.println("Atualizando peer " + partes[0] + " status ONLINE");
                     boolean achou = false;
@@ -133,12 +135,14 @@ class eachare {
                     for(Vizinho v : lista){
                         if(v.getEndereco().equals(partes[0])){
                             v.setEstado("ONLINE");
+                            v.setRelogio(relogio_mensagem);
                             achou = true;
                         }
                     }
                     if(!achou){
                         Vizinho v = new Vizinho(partes[0]);
                         v.setEstado("ONLINE");
+                        v.setRelogio(relogio_mensagem);
                         lista.add(v);
 
                     }
@@ -150,12 +154,14 @@ class eachare {
                     for(Vizinho v : lista){
                         if(v.getEndereco().equals(partes[0])){
                             v.setEstado("OFFLINE");
+                            v.setRelogio(relogio_mensagem);
                             achou = true;
                         }
                     }
                     if(!achou){
                         Vizinho v = new Vizinho(partes[0]);
                         v.setEstado("OFFLINE");
+                        v.setRelogio(relogio_mensagem);
                         lista.add(v);
 
                     }
@@ -165,12 +171,14 @@ class eachare {
                     for(Vizinho v : lista){
                         if(v.getEndereco().equals(partes[0])){
                             v.setEstado("ONLINE");
+                            v.setRelogio(relogio_mensagem);
                             achou = true;
                         }
                     }
                     if(!achou){
                         Vizinho v = new Vizinho(partes[0]);
                         v.setEstado("ONLINE");
+                        v.setRelogio(relogio_mensagem);
                         lista.add(v);
                     }
                     //esses 'for' são para não mandar o endereço de quem mandou o GET_PEERS na resposta 
@@ -179,7 +187,7 @@ class eachare {
                             String lista_de_vizinhos = " ";
                             for(Vizinho vi : lista){
                                 if(!vi.getEndereco().equals(v.getEndereco())){
-                                    lista_de_vizinhos = lista_de_vizinhos + " " +vi.getEndereco()+":"+vi.getEstado()+":0";
+                                    lista_de_vizinhos = lista_de_vizinhos + " " +vi.getEndereco()+":"+vi.getEstado()+":"+vi.getRelogio();
                                 }
                             }
                             m.mandaMensagem(v, endereco, r, "PEER_LIST " + (lista.size()-1) + lista_de_vizinhos);
@@ -197,8 +205,10 @@ class eachare {
                             String[] peers = partes[i].split(":");
                             String campo1 = peers[0] + ":" + peers[1];
                             if(campo1.equals(lista.get(j).getEndereco())){
-                                String[] estado = partes[i].split(":"); 
-                                lista.get(j).setEstado(estado[2]);
+                                String[] estado = partes[i].split(":");
+                                int relogio = Integer.parseInt(estado[3]); 
+                                lista.get(j).setEstado(estado[2], relogio);
+                                lista.get(j).setRelogio(relogio);
                                 achou = true;
                                 break;
                             }
@@ -207,8 +217,10 @@ class eachare {
                             String[] peers = partes[i].split(":");
                             String campo1 = peers[0] + ":" + peers[1];
                             String estado = peers[2];
+                            int relogio = Integer.parseInt(peers[3]);
                             Vizinho peer = new Vizinho(campo1);
-                            peer.setEstado(estado);
+                            peer.setEstado(estado, relogio);
+                            peer.setRelogio(relogio);
                             lista.add(peer);
                         }
                     }

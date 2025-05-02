@@ -12,4 +12,7 @@ class relogio {
         this.relogio = this.relogio+1;
         System.out.println("=> Atualizando relogio para " + this.relogio);
     }
+    public void setRelogio(int mensagem){
+        this.relogio = (this.relogio < mensagem)? mensagem : this.relogio;
+    }
 }

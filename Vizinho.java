@@ -2,9 +2,11 @@
 class Vizinho {
     String endereco;
     String estado;
+    int relogio;
     public Vizinho (String endereco){
         this.endereco = endereco;
         this.estado = "OFFLINE";
+        this.relogio = 0;
     }
     public String getEndereco (){
         return this.endereco;
@@ -14,6 +16,17 @@ class Vizinho {
     }
     public void setEstado (String estado){
         this.estado = estado;
+    }
+    public void setEstado (String estado, int relogio_mensagem){
+        if(relogio_mensagem > this.relogio){
+            this.estado = estado;
+        }
+    }
+    public int getRelogio (){
+        return this.relogio;
+    }
+    public void setRelogio(int mensagem){
+        this.relogio = (this.relogio < mensagem)? mensagem : this.relogio;
     }
     //facilita a impressão das informações do peer
     public void imprime (){

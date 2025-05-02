@@ -32,6 +32,9 @@ class mensagens{
             socket.close();
         } catch (IOException e){
             //se a mensagem não foi recebida, o peer está offline
+            r.incrementaRelogio();
+            String mensagem = endereco + " " + r.getRelogio() + " " + tipo;
+            System.out.println("Encaminhando mensagem " + mensagem + " para " + vizinho.getEndereco()); //acho que era isso que faltava para a parte 1
             vizinho.setEstado("OFFLINE");
         }
     }
