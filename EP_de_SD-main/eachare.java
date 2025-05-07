@@ -4,6 +4,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+//import java.nio.file.Files;
 
 //Essa é a classe principal do programa
 class eachare {
@@ -280,6 +281,71 @@ class eachare {
                     
                     opcoes.executaLS_LIST(partes[0], tamanho_list, arquivos, endereco, r, m, lista); //atualizar os argumentos
                 }
+                if(partes[2].equals("DL")){
+                    //verifica se o peer era conhecido e atualiza seu estado
+                    boolean achou = false;
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            v.setEstado("ONLINE");
+                            v.setRelogio(relogio_mensagem);
+                            achou = true;
+                        }
+                    }
+                    if(!achou){
+                        Vizinho v = new Vizinho(partes[0]);
+                        v.setEstado("ONLINE");
+                        v.setRelogio(relogio_mensagem);
+                        lista.add(v);
+                    }
+                    //executa o comando
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            for(File arquivo : diretorio.listFiles()){
+                                if(arquivo.getName().equals(partes[3])){
+                                    try(FileInputStream fileInputStream = new FileInputStream(arquivo)){
+                                        byte[] fileContent = fileInputStream.readAllBytes();
+                                        System.out.println(fileContent);
+                                        String arquivo_codificado = Base64.getEncoder().encodeToString(fileContent);
+                                        m.mandaMensagem(v, endereco, r, "FILE " + arquivo.getName() + " 0 0 " + arquivo_codificado);
+                                    } catch(IOException e){
+                                        System.out.println("erro ao ler o arquivo");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if(partes[2].equals("FILE")){
+                    //verifica se o peer era conhecido e atualiza seu estado
+                    boolean achou = false;
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            v.setEstado("ONLINE");
+                            v.setRelogio(relogio_mensagem);
+                            achou = true;
+                        }
+                    }
+                    if(!achou){
+                        Vizinho v = new Vizinho(partes[0]);
+                        v.setEstado("ONLINE");
+                        v.setRelogio(relogio_mensagem);
+                        lista.add(v);
+                    }
+                    //executa o comando
+                    String salvar_nome = partes[3];
+                    String arquivo_codificado = partes[6];
+                    try{
+                        byte[] conteudoOriginal = Base64.getDecoder().decode(arquivo_codificado);
+                        try(FileOutputStream fos = new FileOutputStream(new File(diretorio, salvar_nome));){
+                            fos.write(conteudoOriginal);
+                            System.out.println("Download do arquivo " + salvar_nome + " finalizado.");
+                        } catch (IOException e){
+                            System.err.println("Erro ao escrever arquivo");
+                        }
+                    }catch (Exception e){
+                        System.out.println("Erro ao decodificar o arquivo");
+                    }    
+                } 
             } 
             
         } catch (IOException e){
