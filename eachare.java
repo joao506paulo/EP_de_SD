@@ -57,7 +57,7 @@ class eachare {
             try{
                 Socket clientSocket = serverSocket.accept();
                 lista_de_clientes.add(clientSocket);
-                new Thread(() -> handleConnection(clientSocket, r, lista_de_vizinhos, mensagem, endereco)).start();
+                new Thread(() -> handleConnection(clientSocket, r, lista_de_vizinhos, mensagem, endereco, folder, opcoes)).start();
             } catch (SocketException e){
                 System.out.println("Servidor encerrado");
                 break;
@@ -94,7 +94,7 @@ class eachare {
             } else if (comando == 3) {
                 opcoes.comando3(diretorio.listFiles());
             } else if (comando == 4) {
-                opcoes.comando4();
+                opcoes.comando4(lista_vizinhos, mensagem, endereco, r);
             } else if (comando == 5) {
                 opcoes.comando5();
             } else if (comando == 6) {
@@ -117,7 +117,7 @@ class eachare {
     }
 
     //Esse método recebe as mensagens quando uma conexão é feita e executa as ações necessárias para cada mensagem
-    private static void handleConnection (Socket clientSocket, relogio r, List<Vizinho> lista, mensagens m, String endereco) {
+    private static void handleConnection (Socket clientSocket, relogio r, List<Vizinho> lista, mensagens m, String endereco, File diretorio, comandos opcoes) {
         try(
             BufferedReader in = new BufferedReader (new InputStreamReader(clientSocket.getInputStream()));
         ){
@@ -224,11 +224,66 @@ class eachare {
                             lista.add(peer);
                         }
                     }
+                }
+                if(partes[2].equals("LS")){
+                    //verifica se o peer era conhecido e atualiza seu estado
+                    boolean achou = false;
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            v.setEstado("ONLINE");
+                            v.setRelogio(relogio_mensagem);
+                            achou = true;
+                        }
+                    }
+                    if(!achou){
+                        Vizinho v = new Vizinho(partes[0]);
+                        v.setEstado("ONLINE");
+                        v.setRelogio(relogio_mensagem);
+                        lista.add(v);
+                    }
+                    //executa o comando
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            String lista_de_arquivos = " ";
+                            int n = 0;
+                            for (File arquivo : diretorio.listFiles()){
+                                lista_de_arquivos = lista_de_arquivos + arquivo.getName() + ":" + arquivo.length() + " ";
+                                n = n+1;
+                            }
+                            m.mandaMensagem(v, endereco, r, "LS_LIST " + n + lista_de_arquivos);
+                        }
+                    }
                 } 
-        }
-     } catch (IOException e){
-                e.printStackTrace();
-
+                if(partes[2].equals("LS_LIST")){
+                    //verifica se o peer era conhecido e atualiza seu estado
+                    boolean achou = false;
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(partes[0])){
+                            v.setEstado("ONLINE");
+                            v.setRelogio(relogio_mensagem);
+                            achou = true;
+                        }
+                    }
+                    if(!achou){
+                        Vizinho v = new Vizinho(partes[0]);
+                        v.setEstado("ONLINE");
+                        v.setRelogio(relogio_mensagem);
+                        lista.add(v);
+                    }
+                    //executa o comando
+                    int tamanho_list = Integer.parseInt(partes[3]);
+                    System.out.println(tamanho_list);
+                    String[] arquivos = new String[tamanho_list];
+                    for(int i = 4; i < partes.length && (i-4) < tamanho_list; i++){
+                        arquivos[i-4] = partes[i];
+                    }
+                    
+                    opcoes.executaLS_LIST(partes[0], tamanho_list, arquivos, endereco, r, m, lista); //atualizar os argumentos
+                }
+            } 
+            
+        } catch (IOException e){
+            e.printStackTrace();
         } 
     } 
 }

@@ -4,6 +4,9 @@ import java.util.*;
 
 //Essa classe possui métodos para atender a cada um dos comandos disponíveis para o usuário
 class comandos {
+    private int ls;
+    private List<arquivos_vizinhos> lista_de_arquivos = new LinkedList<>();
+
     public void comando1 (List<Vizinho> lista, mensagens m, String endereco, relogio r){
         int i = 1;
         Scanner sc = new Scanner(System.in);
@@ -41,10 +44,16 @@ class comandos {
         }
 
     }
-    public void comando4 (){
-        //será implementado na outra parte do ep
-        System.out.println("Comando ainda não implementado.");   
-    }    
+    public void comando4 (List<Vizinho> lista, mensagens m, String endereco, relogio r){
+        int mensagens_enviadas = 0;
+        for(Vizinho v : lista){
+            if(v.getEstado().equals("ONLINE")){
+                m.mandaMensagem(v, endereco, r, "LS");
+                mensagens_enviadas = mensagens_enviadas +1;
+            }
+        }  
+        this.ls = mensagens_enviadas;
+    }  
     public void comando5 (){
         //será implemantado na outra parte do ep
         System.out.println("Comando ainda não implementado.");   
@@ -65,5 +74,41 @@ class comandos {
             cliente.close();
         }
         serverSocket.close();
+    }
+    public void executaLS_LIST(String endereco_vizinho,int tamanho_list, String[] arquivos, String meu_endereco, relogio r, mensagens m, List<Vizinho> lista){
+        this.ls = this.ls-1;
+        for(String arquivo :  arquivos){
+            //adiciona as informações em uma estrutura
+            this.lista_de_arquivos.add(new arquivos_vizinhos(arquivo, endereco_vizinho));
+        }
+        if(this.ls == 0){ //estou com um bug nessa parte
+            //mostra na tela
+            System.out.println("Arquivos encontrado na rede:");
+            System.out.println("Nome | Tamanho | Peer");
+            System.out.println("[ 0] <Cancelar> | |");
+            int i = 1;
+            for(arquivos_vizinhos arquivo : this.lista_de_arquivos){
+                System.out.println("[ " + i + "] " + arquivo.getNome() + " | " + arquivo.getTamanho() + " | " + arquivo.getNomeVizinho() );
+                i += 1;
+            }
+            System.out.println("Digite o numero do arquivo para fazer o download:");
+            System.out.print(">");
+            Scanner sc = new Scanner(System.in);
+            int comando = sc.nextInt();
+            int j;
+            for(j=0; j <= i; j++){
+                if(comando == 0){
+                    break;
+                }
+                if(comando == j){
+                    System.out.println("chegou aqui.");
+                    for(Vizinho v : lista){
+                        if(v.getEndereco().equals(lista_de_arquivos.get(j-1).getNomeVizinho()));
+                            System.out.println("Achou vizinho");
+                            m.mandaMensagem(v, meu_endereco, r, "DL " + lista_de_arquivos.get(j-1).getNome() + " 0 0"); //atualizar
+                    }
+                }
+            }
+        }
     }
 }

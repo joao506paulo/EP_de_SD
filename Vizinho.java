@@ -1,8 +1,8 @@
 //Essa classe é usada para agrupar as informações de endereço e status dos vizinhos
 class Vizinho {
-    String endereco;
-    String estado;
-    int relogio;
+    private String endereco;
+    private String estado;
+    private int relogio;
     public Vizinho (String endereco){
         this.endereco = endereco;
         this.estado = "OFFLINE";
